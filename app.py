@@ -28,18 +28,17 @@ def initialize_app():
     
     # 1. Load Model
     try:
-        model = joblib.load('model.pkl')
+        model = joblib.load('models/model.pkl')
         print("Model loaded successfully.")
     except FileNotFoundError:
-        print("CRITICAL ERROR: model.pkl not found. Run backend training first.")
+        print("CRITICAL ERROR: models/model.pkl not found. Run backend training first.")
         return
 
     # 2. Load Data for LIME & Stats
     # Try different paths to be robust
     possible_paths = [
-        "../Dataset/credit_risk_dataset.csv",
-        "Dataset/credit_risk_dataset.csv",
-        "c:/Users/athar/Desktop/ATHARVA/CREDIT RISK/Dataset/credit_risk_dataset.csv" 
+        "data/credit_risk_dataset.csv",
+        "../data/credit_risk_dataset.csv"
     ]
     
     df = None
