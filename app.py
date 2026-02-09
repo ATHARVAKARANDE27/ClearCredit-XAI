@@ -29,7 +29,7 @@ def initialize_app():
     # 1. Load Model
     try:
         model = joblib.load('models/model.pkl')
-        print("Model loaded successfully.")
+        print("ClearCredit XAI: Model loaded successfully.")
     except FileNotFoundError:
         print("CRITICAL ERROR: models/model.pkl not found. Run backend training first.")
         return

@@ -1,10 +1,10 @@
-# 💳 Credit Risk Assessment & Explainable ML Application
+# 💳 ClearCredit XAI | Explainable ML Application
 
 ## 📌 Problem Statement
 Financial institutions must assess loan applicants quickly while maintaining transparency and regulatory explainability. Traditional models often fail to clearly justify why a customer is approved or rejected.
 
 ## 🚀 Project Overview
-This project is an end-to-end **Credit Risk Assessment** web application that predicts whether a loan applicant is **High Risk** or **Low Risk**, estimates the probability of default, and provides explainable reasons behind each decision using **LIME** (Local Interpretable Model-agnostic Explanations).
+This project is an end-to-end **ClearCredit XAI** web application that predicts whether a loan applicant is **High Risk** or **Low Risk**, estimates the probability of default, and provides explainable reasons behind each decision using **LIME** (Local Interpretable Model-agnostic Explanations).
 
 ## 💼 Business Value
 *   **Enables faster, consistent credit decisions**: Automating the initial screening process.

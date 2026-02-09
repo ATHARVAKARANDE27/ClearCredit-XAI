@@ -75,7 +75,7 @@ def train_and_evaluate(X, y, preprocessor):
     
     results = {}
     
-    print("\n--- Model Evaluation ---")
+    print("\n--- ClearCredit XAI: Model Evaluation ---")
     
     best_model_name = None
     best_f1 = -1
