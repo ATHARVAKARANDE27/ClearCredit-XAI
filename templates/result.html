@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result | CreditGuard</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- Dynamic Background -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+
+    <header class="app-container slide-in">
+        <div class="brand">
+            <i class="fas fa-shield-alt fa-lg"></i> Credit<span>Guard</span>
+        </div>
+        <a href="/" class="btn-primary" style="width: auto; margin:0; padding: 0.7rem 1.5rem; font-size: 0.9rem;">
+            <i class="fas fa-plus"></i> New Analysis
+        </a>
+    </header>
+
+    <div class="app-container">
+
+        <!-- Header Section -->
+        <div class="glass-card result-header fade-in-up">
+            <h4>Assessment Complete</h4>
+            <div class="risk-label {{ result }}">
+                {{ result }} Risk
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                <div class="text-center">
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Default Probability</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">{{ probability }}%</div>
+                </div>
+                <!-- Add a vertical separator if needed, or just gap -->
+                <div class="text-center">
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Confidence Score</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">High</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- 1. AI Analysis (Key Drivers) -->
+            <div class="glass-card col-span-8 fade-in-up delay-1">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3><i class="fas fa-robot" style="color: var(--accent-color);"></i> &nbsp; AI Analysis &
+                        Recommendations</h3>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Explainable AI Insights</span>
+                </div>
+
+                <div class="drivers-grid">
+                    {% for item in top_reasons %}
+                    {% set is_risk = item.impact == 'Negative' %}
+                    {% set card_class = 'increase' if is_risk else 'decrease' %}
+
+                    <div class="driver-card {{ card_class }}">
+                        <div class="driver-icon {{ card_class }}">
+                            <i class="fas {{ item.icon }}"></i>
+                        </div>
+                        <div class="driver-content">
+                            <div class="driver-title"
+                                style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">
+                                {{ item.condition }}
+                            </div>
+                            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main); margin: 0.3rem 0;">
+                                {{ item.recommendation }}
+                            </div>
+                            <div class="driver-impact">
+                                {% if is_risk %}
+                                <i class="fas fa-arrow-trend-up"></i> Increases Risk
+                                {% else %}
+                                <i class="fas fa-shield-heart"></i> Strength
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="driver-card decrease" style="grid-column: 1 / -1;">
+                        <div class="driver-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="driver-content">
+                            <div class="driver-title">System Analysis</div>
+                            <div style="font-weight: 600;">No significant risk factors flagged. Standard profile
+                                detected.</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 2. Risk Gauge Widget -->
+            <div class="glass-card col-span-4 text-center fade-in-up delay-2"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-tachometer-alt"
+                        style="color: var(--primary-color);"></i> Risk Score</h3>
+                <div style="position: relative; height: 220px; width: 100%;">
+                    <canvas id="riskGauge"></canvas>
+                    <div style="position: absolute; top: 55%; left: 0; right: 0; text-align: center;">
+                        <span style="font-size: 2.5rem; font-weight: 800; color: var(--text-main);">{{ probability
+                            }}</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: -20px;">
+                    0 = Safe, 100 = Default
+                </p>
+            </div>
+
+            <!-- 3. Income Analysis -->
+            <div class="glass-card col-span-12 fade-in-up delay-3">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3><i class="fas fa-wallet" style="color: var(--secondary-color);"></i> Income Benchmarking</h3>
+                    <div class="value-display" style="font-size: 1rem;">Rank: {{ comparison.income_rank }}</div>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // -- Data Injection --
+        const prob = Number("{{ probability }}");
+        const userIncome = Number("{{ comparison.user_income }}");
+        const avgIncome = Number("{{ comparison.avg_income }}");
+        const riskLevel = "{{ result }}";
+
+        // --- Charts Theme ---
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+        // 1. Risk Gauge
+        const ctxGauge = document.getElementById('riskGauge').getContext('2d');
+        // Dynamic Color based on risk
+        const gaugeColor = prob > 50 ? '#ef4444' : (prob > 20 ? '#f59e0b' : '#10b981');
+
+        new Chart(ctxGauge, {
+            type: 'doughnut',
+            data: {
+                labels: ['Risk Score', 'Safe Buffer'],
+                datasets: [{
+                    data: [prob, 100 - prob],
+                    backgroundColor: [
+                        gaugeColor,
+                        'rgba(255,255,255,0.03)'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 30, // Round ends
+                    cutout: '85%',
+                    rotation: 235,
+                    circumference: 250
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+
+        // 2. Income Chart
+        const ctxIncome = document.getElementById('incomeChart').getContext('2d');
+
+        // Gradient for bars
+        const gradientUser = ctxIncome.createLinearGradient(0, 0, 0, 400);
+        gradientUser.addColorStop(0, '#3b82f6');
+        gradientUser.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+
+        const gradientAvg = ctxIncome.createLinearGradient(0, 0, 0, 400);
+        gradientAvg.addColorStop(0, '#64748b');
+        gradientAvg.addColorStop(1, 'rgba(100, 116, 139, 0.2)');
+
+        new Chart(ctxIncome, {
+            type: 'bar',
+            data: {
+                labels: ['Your Income', 'Average Approved Income'],
+                datasets: [{
+                    data: [userIncome, avgIncome],
+                    backgroundColor: [gradientUser, gradientAvg],
+                    borderRadius: 8,
+                    barThickness: 60,
+                    maxBarThickness: 100
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal Layout is often better for comparisons
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            callback: function (value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.02)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return ' $' + context.raw.toLocaleString();
+                            }
+                        },
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#cbd5e1',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
