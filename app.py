@@ -309,12 +309,50 @@ def predict():
             result=result_text,
             probability=round(probability * 100, 2),
             top_reasons=top_reasons,
-            comparison=comparison
+            comparison=comparison,
+            original_data=form_data
         )
+
         
     except Exception as e:
         traceback.print_exc()
         return f"Error: {str(e)}", 400
 
+@app.route('/predict_api', methods=['POST'])
+def predict_api():
+    """API endpoint for 'What-If' simulation (returns JSON)"""
+    if model is None:
+        return {"error": "Model not loaded"}, 500
+    try:
+        data = request.get_json()
+        
+        # Parse inputs (re-using form logic but for JSON)
+        form_data = {
+            'person_age': int(data['person_age']),
+            'person_income': int(data['person_income']),
+            'person_home_ownership': data['person_home_ownership'],
+            'person_emp_length': float(data['person_emp_length']),
+            'loan_intent': data['loan_intent'],
+            'loan_grade': data['loan_grade'],
+            'loan_amnt': int(data['loan_amnt']),
+            'loan_int_rate': float(data['loan_int_rate']),
+            'loan_percent_income': float(data['loan_percent_income']),
+            'cb_person_default_on_file': data['cb_person_default_on_file'],
+            'cb_person_cred_hist_length': int(data['cb_person_cred_hist_length'])
+        }
+        
+        df_input = pd.DataFrame([form_data])
+        probability = model.predict_proba(df_input)[0][1]
+        prediction = model.predict(df_input)[0]
+        result_text = "High" if prediction == 1 else "Low"
+        
+        return {
+            "probability": round(probability * 100, 2),
+            "result": result_text
+        }
+    except Exception as e:
+        return {"error": str(e)}, 400
+
 if __name__ == '__main__':
     app.run(debug=True)
+

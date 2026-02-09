@@ -49,7 +49,6 @@
                     <div style="font-size: 0.9rem; color: var(--text-muted);">Default Probability</div>
                     <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">{{ probability }}%</div>
                 </div>
-                <!-- Add a vertical separator if needed, or just gap -->
                 <div class="text-center">
                     <div style="font-size: 0.9rem; color: var(--text-muted);">Confidence Score</div>
                     <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">High</div>
@@ -125,14 +124,74 @@
                 </p>
             </div>
 
-            <!-- 3. Income Analysis -->
-            <div class="glass-card col-span-12 fade-in-up delay-3">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3><i class="fas fa-wallet" style="color: var(--secondary-color);"></i> Income Benchmarking</h3>
-                    <div class="value-display" style="font-size: 1rem;">Rank: {{ comparison.income_rank }}</div>
+            <!-- 3. What-If Simulator (Interactive) -->
+            <div class="glass-card col-span-8 fade-in-up delay-1">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3><i class="fas fa-sliders-h" style="color: var(--accent-color);"></i> &nbsp; What-If Simulation
+                    </h3>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); cursor: help;"
+                        title="See how changes to your loan affect your risk profile.">Real-time Optimization</span>
                 </div>
-                <div style="height: 250px;">
-                    <canvas id="incomeChart"></canvas>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                    <div class="simulator-slider">
+                        <label style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Loan
+                            Amount ($)</label>
+                        <input type="range" id="sim_loan_amnt" min="1000" max="50000" step="500"
+                            value="{{ original_data.loan_amnt }}"
+                            style="margin:0; accent-color: var(--primary-color); width: 100%;">
+                        <div id="sim_loan_amnt_val"
+                            style="font-weight: 700; margin-top: 0.5rem; color: var(--text-main);">$ {{
+                            "{:,.0f}".format(original_data.loan_amnt) }}</div>
+                    </div>
+
+                    <div class="simulator-slider">
+                        <label
+                            style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Interest
+                            Rate (%)</label>
+                        <input type="range" id="sim_loan_int_rate" min="1" max="25" step="0.5"
+                            value="{{ original_data.loan_int_rate }}"
+                            style="margin:0; accent-color: var(--secondary-color); width: 100%;">
+                        <div id="sim_loan_int_rate_val"
+                            style="font-weight: 700; margin-top: 0.5rem; color: var(--text-main);">{{
+                            original_data.loan_int_rate }} %</div>
+                    </div>
+                </div>
+
+                <div id="simulator_msg"
+                    style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-md); font-size: 0.9rem; border-left: 3px solid var(--accent-color); display: none;">
+                    <i class="fas fa-lightbulb"></i> <span id="sim_advice">Try reducing loan amount for lower
+                        risk.</span>
+                </div>
+            </div>
+
+            <!-- 4. Financial Health Snapshot (DTI) -->
+            <div class="glass-card col-span-4 fade-in-up delay-2">
+                <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-heartbeat" style="color: #ef4444;"></i> Stress Test
+                </h3>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Monthly Pmt / Income</span>
+                        <span id="dti_value" style="font-weight: 700; color: var(--text-main);">Calculated...</span>
+                    </div>
+                    <div
+                        style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                        <div id="dti_bar"
+                            style="height: 100%; background: var(--secondary-color); width: 0%; transition: 0.4s;">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="offer_box"
+                    style="padding: 1rem; border: 1px dashed rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); border-radius: var(--radius-md); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Max Safe Offer
+                    </div>
+                    <div id="max_loan_val" style="font-size: 1.25rem; font-weight: 800; color: var(--secondary-color);">
+                        $0</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic;">Based on DTI
+                        Guidelines</div>
                 </div>
             </div>
 
@@ -140,34 +199,30 @@
     </div>
 
     <script>
-        // -- Data Injection --
+        // Data Injection
+        const originalData = {{ original_data | tojson }};
         const prob = Number("{{ probability }}");
-        const userIncome = Number("{{ comparison.user_income }}");
-        const avgIncome = Number("{{ comparison.avg_income }}");
-        const riskLevel = "{{ result }}";
 
-        // --- Charts Theme ---
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+        // Element Selectors
+        const riskScoreText = document.querySelector('.risk-label');
+        const gaugeValDisplay = document.querySelector('.glass-card.col-span-4 span[style*="2.5rem"]');
 
-        // 1. Risk Gauge
+        // Initialize Gauge Chart
         const ctxGauge = document.getElementById('riskGauge').getContext('2d');
-        // Dynamic Color based on risk
         const gaugeColor = prob > 50 ? '#ef4444' : (prob > 20 ? '#f59e0b' : '#10b981');
 
-        new Chart(ctxGauge, {
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        const riskGaugeChart = new Chart(ctxGauge, {
             type: 'doughnut',
             data: {
                 labels: ['Risk Score', 'Safe Buffer'],
                 datasets: [{
                     data: [prob, 100 - prob],
-                    backgroundColor: [
-                        gaugeColor,
-                        'rgba(255,255,255,0.03)'
-                    ],
+                    backgroundColor: [gaugeColor, 'rgba(255,255,255,0.03)'],
                     borderWidth: 0,
-                    borderRadius: 30, // Round ends
+                    borderRadius: 30,
                     cutout: '85%',
                     rotation: 235,
                     circumference: 250
@@ -179,73 +234,77 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
-                },
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
                 }
             }
         });
 
-        // 2. Income Chart
-        const ctxIncome = document.getElementById('incomeChart').getContext('2d');
+        const updateRiskUI = (data) => {
+            riskGaugeChart.data.datasets[0].data = [data.probability, 100 - data.probability];
+            riskGaugeChart.data.datasets[0].backgroundColor[0] = data.probability > 50 ? '#ef4444' : (data.probability > 20 ? '#f59e0b' : '#10b981');
+            riskGaugeChart.update();
 
-        // Gradient for bars
-        const gradientUser = ctxIncome.createLinearGradient(0, 0, 0, 400);
-        gradientUser.addColorStop(0, '#3b82f6');
-        gradientUser.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+            gaugeValDisplay.innerText = data.probability;
+            riskScoreText.innerText = data.result + " Risk";
+            riskScoreText.className = "risk-label " + data.result;
 
-        const gradientAvg = ctxIncome.createLinearGradient(0, 0, 0, 400);
-        gradientAvg.addColorStop(0, '#64748b');
-        gradientAvg.addColorStop(1, 'rgba(100, 116, 139, 0.2)');
+            const adviceBox = document.getElementById('simulator_msg');
+            const adviceText = document.getElementById('sim_advice');
+            adviceBox.style.display = 'block';
 
-        new Chart(ctxIncome, {
-            type: 'bar',
-            data: {
-                labels: ['Your Income', 'Average Approved Income'],
-                datasets: [{
-                    data: [userIncome, avgIncome],
-                    backgroundColor: [gradientUser, gradientAvg],
-                    borderRadius: 8,
-                    barThickness: 60,
-                    maxBarThickness: 100
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y', // Horizontal Layout is often better for comparisons
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            callback: function (value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    },
-                    y: {
-                        grid: { color: 'rgba(255,255,255,0.02)' }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return ' $' + context.raw.toLocaleString();
-                            }
-                        },
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleColor: '#fff',
-                        bodyColor: '#cbd5e1',
-                        padding: 10,
-                        cornerRadius: 8,
-                        displayColors: false
-                    }
-                }
+            if (data.result === 'High') {
+                adviceText.innerText = "Risk level is High. Consider reducing loan amount or improving interest rate.";
+                adviceBox.style.borderLeftColor = "#ef4444";
+            } else {
+                adviceText.innerText = "Current parameters maintain a Low risk profile. Optimized for approval.";
+                adviceBox.style.borderLeftColor = "#10b981";
             }
-        });
+        };
+
+        const calculateFinancials = () => {
+            const loan = Number(document.getElementById('sim_loan_amnt').value);
+            const rate = Number(document.getElementById('sim_loan_int_rate').value) / 100 / 12;
+            const income = originalData.person_income / 12;
+
+            const emi = loan * rate * Math.pow(1 + rate, 60) / (Math.pow(1 + rate, 60) - 1);
+            const dti = (emi / income) * 100;
+
+            document.getElementById('dti_value').innerText = dti.toFixed(1) + "%";
+            const dtiBar = document.getElementById('dti_bar');
+            dtiBar.style.width = Math.min(dti, 100) + "%";
+            dtiBar.style.background = dti > 40 ? '#ef4444' : '#10b981';
+
+            const maxMonthly = income * 0.36;
+            const maxLoan = (maxMonthly * (Math.pow(1 + rate, 60) - 1)) / (rate * Math.pow(1 + rate, 60));
+            document.getElementById('max_loan_val').innerText = "$" + Math.floor(maxLoan).toLocaleString();
+        };
+
+        const runSimulation = async () => {
+            const updatedData = { ...originalData };
+            updatedData.loan_amnt = document.getElementById('sim_loan_amnt').value;
+            updatedData.loan_int_rate = document.getElementById('sim_loan_int_rate').value;
+
+            document.getElementById('sim_loan_amnt_val').innerText = "$ " + Number(updatedData.loan_amnt).toLocaleString();
+            document.getElementById('sim_loan_int_rate_val').innerText = updatedData.loan_int_rate + " %";
+
+            calculateFinancials();
+
+            try {
+                const response = await fetch('/predict_api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                const data = await response.json();
+                updateRiskUI(data);
+            } catch (err) {
+                console.error("Simulation failed:", err);
+            }
+        };
+
+        document.getElementById('sim_loan_amnt').addEventListener('input', runSimulation);
+        document.getElementById('sim_loan_int_rate').addEventListener('input', runSimulation);
+
+        calculateFinancials();
     </script>
 </body>
 
