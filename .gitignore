@@ -139,14 +139,10 @@ scripts/*.txt
 *.output
 
 
-# Pyre type checker
-.pyre/
+# Large ML Artifacts
+data/
+models/
 
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
 
 # Large Model Files (Optional: remove if you want to keep model.pkl on GitHub)
 # model.pkl
