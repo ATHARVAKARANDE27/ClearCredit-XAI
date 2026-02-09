@@ -40,9 +40,10 @@ Follow these steps to run the project locally.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ATHARVAKARANDE27/CREDIT-RISK.git
-   cd CREDIT-RISK
+   git clone https://github.com/ATHARVAKARANDE27/ClearCredit-XAI.git
+   cd ClearCredit-XAI
    ```
+
 
 2. **Set up Environment:**
    ```bash
