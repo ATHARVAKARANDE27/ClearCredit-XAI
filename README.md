@@ -16,9 +16,10 @@ This project is an end-to-end **Credit Risk Assessment** web application that pr
 *   **Backend**: Python, Flask
 *   **Machine Learning**: Scikit-learn, LIME
 *   **Frontend**: HTML, CSS, JavaScript (Vanilla)
-*   **Data**: Historical credit risk dataset
+*   **Data**: [Kaggle Credit Risk Dataset](https://www.kaggle.com/datasets/laotse/credit-risk-dataset) (Historical data)
 
 ## 🧠 Model Development
+
 *   **Models evaluated**: Logistic Regression, Decision Tree, Random Forest.
 *   **Metric used**: **F1-Score**, prioritizing the balance between detecting risky borrowers and minimizing false positives.
 *   **Final model**: Random Forest.
@@ -34,9 +35,29 @@ For applicants flagged as **High Risk**, LIME identifies the most influential fe
 ---
 
 ### 🛠️ Getting Started
-*(Since data and models are not tracked in this repository, you must train the model first)*
 
-1. **Clone the repository**
-2. **Install dependencies**: `pip install -r requirements.txt`
-3. **Train the model**: `python utils/main.py`
-4. **Run the application**: `python app.py`
+Follow these steps to run the project locally.
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ATHARVAKARANDE27/CREDIT-RISK.git
+   cd CREDIT-RISK
+   ```
+
+2. **Set up Environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Data Setup:**
+   - Create a folder named `data/` in the root directory.
+   - Download the dataset from [Kaggle](https://www.kaggle.com/datasets/laotse/credit-risk-dataset).
+   - Place `credit_risk_dataset.csv` inside the `data/` folder.
+
+4. **Train & Run:**
+   - Train the model: `python utils/main.py`
+   - Start the server: `python app.py`
+   - Open: `http://127.0.0.1:5000`
+

@@ -1,11 +1,8 @@
-pandas
+flask
+joblib
+lime
 numpy
+pandas
 scikit-learn
 matplotlib
 seaborn
-jupyter
-flask
-joblib
-shap
-
-lime
