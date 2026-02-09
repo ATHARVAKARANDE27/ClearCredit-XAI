@@ -142,8 +142,9 @@
                             <label
                                 style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Loan
                                 Amount ($)</label>
-                            <span id="sim_loan_amnt_val" style="font-weight: 700; color: var(--secondary-color);">$ {{
-                                "{:,.0f}".format(original_data.loan_amnt) }}</span>
+                            <input type="number" id="sim_loan_amnt_input" min="1000" max="250000" step="1000"
+                                value="{{ original_data.loan_amnt }}"
+                                style="width: 80px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color); font-weight: 700; border-radius: 4px; padding: 2px 5px; font-size: 0.85rem; text-align: right;">
                         </div>
                         <input type="range" id="sim_loan_amnt" min="1000" max="250000" step="1000"
                             value="{{ original_data.loan_amnt }}"
@@ -160,8 +161,9 @@
                             <label
                                 style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Interest
                                 Rate (%)</label>
-                            <span id="sim_loan_int_rate_val" style="font-weight: 700; color: var(--secondary-color);">{{
-                                original_data.loan_int_rate }} %</span>
+                            <input type="number" id="sim_loan_int_rate_input" min="1" max="30" step="0.5"
+                                value="{{ original_data.loan_int_rate }}"
+                                style="width: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color); font-weight: 700; border-radius: 4px; padding: 2px 5px; font-size: 0.85rem; text-align: right;">
                         </div>
                         <input type="range" id="sim_loan_int_rate" min="1" max="30" step="0.5"
                             value="{{ original_data.loan_int_rate }}"
@@ -240,10 +242,10 @@
         const riskScoreText = document.querySelector('.risk-label');
         const gaugeValDisplay = document.querySelector('.glass-card.col-span-4 span[style*="2.5rem"]');
 
-        const simLoanInput = document.getElementById('sim_loan_amnt');
-        const simRateInput = document.getElementById('sim_loan_int_rate');
-        const simLoanVal = document.getElementById('sim_loan_amnt_val');
-        const simRateVal = document.getElementById('sim_loan_int_rate_val');
+        const simLoanRange = document.getElementById('sim_loan_amnt');
+        const simRateRange = document.getElementById('sim_loan_int_rate');
+        const simLoanInput = document.getElementById('sim_loan_amnt_input');
+        const simRateInput = document.getElementById('sim_loan_int_rate_input');
         const dtiStatus = document.getElementById('dti_status');
 
         // Initialize Gauge Chart
@@ -278,7 +280,9 @@
         });
 
         const resetSimulator = () => {
+            simLoanRange.value = originalData.loan_amnt;
             simLoanInput.value = originalData.loan_amnt;
+            simRateRange.value = originalData.loan_int_rate;
             simRateInput.value = originalData.loan_int_rate;
             runSimulation();
         };
@@ -342,9 +346,6 @@
             updatedData.loan_amnt = simLoanInput.value;
             updatedData.loan_int_rate = simRateInput.value;
 
-            simLoanVal.innerText = "$ " + Number(updatedData.loan_amnt).toLocaleString();
-            simRateVal.innerText = updatedData.loan_int_rate + " %";
-
             calculateFinancials();
 
             try {
@@ -360,8 +361,25 @@
             }
         };
 
-        simLoanInput.addEventListener('input', runSimulation);
-        simRateInput.addEventListener('input', runSimulation);
+        // Sync Range -> Number
+        simLoanRange.addEventListener('input', (e) => {
+            simLoanInput.value = e.target.value;
+            runSimulation();
+        });
+        simRateRange.addEventListener('input', (e) => {
+            simRateInput.value = e.target.value;
+            runSimulation();
+        });
+
+        // Sync Number -> Range
+        simLoanInput.addEventListener('input', (e) => {
+            simLoanRange.value = e.target.value;
+            runSimulation();
+        });
+        simRateInput.addEventListener('input', (e) => {
+            simRateRange.value = e.target.value;
+            runSimulation();
+        });
 
         // Initial setup
         calculateFinancials();
