@@ -141,7 +141,8 @@ scripts/*.txt
 
 # Large ML Artifacts
 data/
-models/
+!models/
+
 
 
 # Large Model Files (Optional: remove if you want to keep model.pkl on GitHub)

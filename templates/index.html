@@ -226,9 +226,11 @@
                         <div class="input-wrapper">
                             <div class="input-group">
                                 <input type="number" step="0.01" max="1" min="0" name="loan_percent_income" id="lti"
-                                    placeholder=" " required>
-                                <label for="lti">Loan-to-Income Ratio (0.0 - 1.0)</label>
+                                    placeholder=" " required readonly
+                                    style="background: rgba(255,255,255,0.02); cursor: not-allowed;">
+                                <label for="lti">Loan-to-Income Ratio (Auto-calculated)</label>
                                 <i class="fas fa-balance-scale input-icon"></i>
+
                             </div>
                         </div>
 

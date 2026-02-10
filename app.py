@@ -53,9 +53,30 @@ def initialize_app():
         return
 
     # 3. Calculate Stats for Dashboard (Comparison)
-    stats_metadata['avg_income'] = df['person_income'].mean()
-    stats_metadata['median_income'] = df['person_income'].median()
-    stats_metadata['income_percentiles'] = np.percentile(df['person_income'], [25, 50, 75])
+    if df is not None:
+        approved_df = df[df['loan_status'] == 0]
+        stats_metadata['avg_income'] = float(df['person_income'].mean())
+        stats_metadata['median_income'] = float(df['person_income'].median())
+        stats_metadata['income_percentiles'] = [float(x) for x in np.percentile(df['person_income'].dropna(), [25, 50, 75])]
+        
+        # Database-derived thresholds for the UI
+        if not approved_df.empty:
+            stats_metadata['database_stats'] = {
+                'avg_lti_approved': float(approved_df['loan_percent_income'].mean()),
+                'p75_lti_approved': float(np.percentile(approved_df['loan_percent_income'].dropna(), 75)),
+                'avg_income_approved': float(approved_df['person_income'].mean())
+            }
+        else:
+            stats_metadata['database_stats'] = {
+                'avg_lti_approved': 0.15,
+                'p75_lti_approved': 0.20,
+                'avg_income_approved': 50000.0
+            }
+    else:
+        stats_metadata['avg_income'] = 0
+        stats_metadata['database_stats'] = {}
+
+
     
     # 4. Initialize LIME Explainer
     print("Initializing LIME Explainer...")
@@ -282,7 +303,7 @@ def predict():
             except Exception as e:
                 print(f"LIME Error: {e}")
                 traceback.print_exc()
-                top_reasons = ["Explanation data unavailable."]
+                top_reasons = [] # LIME failure - template will show empty state gracefully
 
         # 4. Prepare Comparison Data
         income = form_data['person_income']
@@ -310,8 +331,10 @@ def predict():
             probability=round(probability * 100, 2),
             top_reasons=top_reasons,
             comparison=comparison,
-            original_data=form_data
+            original_data=form_data,
+            db_stats=stats_metadata.get('database_stats', {})
         )
+
 
         
     except Exception as e:

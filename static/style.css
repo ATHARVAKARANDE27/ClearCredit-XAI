@@ -30,6 +30,13 @@
     --transition-fast: 0.2s ease;
     --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --radius-full: 9999px;
+
+    /* Status Colors */
+    --risk-high: #ef4444;
+    --risk-low: #10b981;
+    --risk-medium: #f59e0b;
+    --risk-high-glow: rgba(239, 68, 68, 0.3);
+    --risk-low-glow: rgba(16, 185, 129, 0.3);
 }
 
 /* --- Global Reset & Body --- */

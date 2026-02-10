@@ -10,7 +10,9 @@ This project is an end-to-end ClearCredit XAI web application that predicts whet
 - Enables faster, consistent credit decisions: Automating the initial screening process.
 - Supports regulator-friendly explainability: Provides clear justification for loan decisions.
 - Reduces manual underwriting effort: Allows experts to focus on complex cases.
+- Automated Financial Calculations: Real-time LTI and DTI estimation grounded in historical data.
 - Helps risk teams prioritize high-risk applicants: Visual dashboards highlighting critical risk factors.
+
 
 ## Tech Stack
 - Backend: Python, Flask

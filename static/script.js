@@ -39,7 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Wizard Logic ---
+    // --- Auto-calculate LTI Ratio ---
+    const incomeInput = document.getElementById('income');
+    const amountInput = document.getElementById('amnt');
+    const ltiInput = document.getElementById('lti');
+
+    const calculateLTI = () => {
+        const income = parseFloat(incomeInput.value.replace(/[^0-9.]/g, '')) || 0;
+        const amount = parseFloat(amountInput.value.replace(/[^0-9.]/g, '')) || 0;
+
+        if (income > 0) {
+            const ratio = (amount / income).toFixed(2);
+            ltiInput.value = Math.min(ratio, 1.0); // Clamp to 1.0 for the model's standard
+        } else {
+            ltiInput.value = "";
+        }
+    };
+
+    if (incomeInput && amountInput && ltiInput) {
+        incomeInput.addEventListener('input', calculateLTI);
+        amountInput.addEventListener('input', calculateLTI);
+    }
+
     const initWizard = () => {
         const steps = document.querySelectorAll('.form-step');
         const stepItems = document.querySelectorAll('.step-item'); // Changed selector

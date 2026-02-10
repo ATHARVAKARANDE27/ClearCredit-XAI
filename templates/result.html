@@ -116,7 +116,8 @@
                 <div style="position: relative; height: 220px; width: 100%;">
                     <canvas id="riskGauge"></canvas>
                     <div style="position: absolute; top: 55%; left: 0; right: 0; text-align: center;">
-                        <span style="font-size: 2.5rem; font-weight: 800; color: var(--text-main);">{{ probability
+                        <span id="risk_gauge_value"
+                            style="font-size: 2.5rem; font-weight: 800; color: var(--text-main);">{{ probability
                             }}</span>
                     </div>
                 </div>
@@ -241,14 +242,25 @@
         </div>
     </div>
 
+    <!-- Data injection via attributes to avoid JS linting errors in IDE -->
+    <div id="data-store" data-original='{{ original_data | default({}, true) | tojson | safe }}'
+        data-stats='{{ db_stats | default({}, true) | tojson | safe }}'
+        data-prob='{{ probability | default(0, true) }}'></div>
+
+
     <script>
-        // Data Injection
-        const originalData = {{ original_data | tojson }};
-        const probOrig = Number("{{ probability }}");
+        // Data Extraction from HTML Store (Grounds app in DB-derived stats)
+        const store = document.getElementById('data-store');
+        const originalData = JSON.parse(store.dataset.original);
+        const dbStats = JSON.parse(store.dataset.stats);
+        const probOrig = Number(store.dataset.prob);
+
+
+
 
         // Element Selectors
         const riskScoreText = document.querySelector('.risk-label');
-        const gaugeValDisplay = document.querySelector('.glass-card.col-span-4 span[style*="2.5rem"]');
+        const gaugeValDisplay = document.getElementById('risk_gauge_value');
 
         const simLoanRange = document.getElementById('sim_loan_amnt');
         const simRateRange = document.getElementById('sim_loan_int_rate');
@@ -326,33 +338,43 @@
             const emi = loan * rate * Math.pow(1 + rate, 60) / (Math.pow(1 + rate, 60) - 1);
             const dti = (emi / income) * 100;
 
+            // Database-derived Thresholds (using LTI percent from DB as proxy for safe DTI)
+            const safeThreshold = (dbStats.avg_lti_approved || 0.15) * 100 * 1.5; // Avg * 1.5 cushion
+            const warningThreshold = (dbStats.p75_lti_approved || 0.20) * 100 * 1.8; // P75 * 1.8 cushion
+
             document.getElementById('dti_value').innerText = dti.toFixed(1) + "%";
             const dtiBar = document.getElementById('dti_bar');
             dtiBar.style.width = Math.min(dti, 100) + "%";
 
-            if (dti > 45) {
+            if (dti > warningThreshold) {
                 dtiBar.style.background = '#ef4444';
-                dtiStatus.innerText = "Critical DTI Level";
+                dtiStatus.innerText = "Above Database Average Risk";
                 dtiStatus.style.color = '#ef4444';
-            } else if (dti > 36) {
+            } else if (dti > safeThreshold) {
                 dtiBar.style.background = '#f59e0b';
-                dtiStatus.innerText = "Lender Warning Zone";
+                dtiStatus.innerText = "Approaching Data Limits";
                 dtiStatus.style.color = '#f59e0b';
             } else {
                 dtiBar.style.background = '#10b981';
-                dtiStatus.innerText = "Strong Financial Health";
+                dtiStatus.innerText = "Below Database Risk Average";
                 dtiStatus.style.color = '#10b981';
             }
 
-            const maxMonthly = income * 0.36; // 36% rule
-            const maxLoan = (maxMonthly * (Math.pow(1 + rate, 60) - 1)) / (rate * Math.pow(1 + rate, 60));
+            // Estimate Max Loan based on Database Average Approved LTI
+            const maxLoan = income * (dbStats.p75_lti_approved || 0.20) * 12; // Yearly income * P75 LTI
             document.getElementById('max_loan_val').innerText = "$" + Math.floor(maxLoan).toLocaleString();
+
         };
 
         const runSimulation = async () => {
             const updatedData = { ...originalData };
             updatedData.loan_amnt = simLoanInput.value;
             updatedData.loan_int_rate = simRateInput.value;
+
+
+            // Recalculate loan-to-income ratio (crucial for model consistency)
+            updatedData.loan_percent_income = (Number(updatedData.loan_amnt) / Number(updatedData.person_income)).toFixed(2);
+
 
             calculateFinancials();
 
