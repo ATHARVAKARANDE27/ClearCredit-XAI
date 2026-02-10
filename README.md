@@ -1,4 +1,4 @@
-# ClearCredit XAI | Explainable ML Application
+# ClearCredit XAI 
 
 ## Problem Statement
 Financial institutions must assess loan applicants quickly while maintaining transparency and regulatory explainability. Traditional models often fail to clearly justify why a customer is approved or rejected.
