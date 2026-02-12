@@ -33,8 +33,8 @@
             <!-- Result Overview -->
             <div class="glass-card col-12 result-card">
                 <span class="subtitle"
-                    style="color: var(--color-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Your
-                    Result</span>
+                    style="color: var(--color-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">The
+                    Verdict</span>
                 <div class="risk-value {{ result }}">{{ result }} Risk</div>
                 <div
                     style="display: flex; justify-content: center; gap: 4rem; margin-top: 2rem; border-top: 1px solid var(--color-glass-border); padding-top: 2rem;">
@@ -54,7 +54,7 @@
             <!-- AI Drivers (LIME) -->
             <div class="glass-card col-8">
                 <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 15px;">
-                    <i class="fas fa-lightbulb" style="color: var(--color-primary);"></i> What influenced the decision?
+                    <i class="fas fa-lightbulb" style="color: var(--color-primary);"></i> What's driving the decision?
                 </h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     {% for item in top_reasons %}
@@ -92,7 +92,7 @@
             <!-- What-If Simulator -->
             <div class="glass-card col-8">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
-                    <h3>Try Different <span>Scenarios</span></h3>
+                    <h3>Alternative <span>Realities</span></h3>
                     <button onclick="resetSimulator()" class="btn-nav outline" style="font-size: 0.7rem;">Reset
                         Params</button>
                 </div>
@@ -122,7 +122,8 @@
 
                 <div id="sim_feedback"
                     style="margin-top: 3rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border-left: 2px solid var(--color-primary); font-size: 0.9rem;">
-                    <i class="fas fa-info-circle"></i> <span id="sim_advice">Calculating risk for these values...</span>
+                    <i class="fas fa-info-circle"></i> <span id="sim_advice">Shifting variables to redraw the risk
+                        landscape...</span>
                 </div>
             </div>
 

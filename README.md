@@ -13,6 +13,12 @@ This project is an end-to-end ClearCredit XAI web application that predicts whet
 - Automated Financial Calculations: Real-time LTI and DTI estimation grounded in historical data.
 - Helps risk teams prioritize high-risk applicants: Visual dashboards highlighting critical risk factors.
 
+## Core Highlights
+- **Obsidian & Orange UI**: A premium, futuristic dark-themed interface designed for clarity and a professional feel.
+- **Interactive "Alternative Realities" Simulator**: A dynamic "What-If" tool that allows users to adjust loan parameters and see risk changes in real-time.
+- **Neural Insights (XAI)**: Visualizes the exact factors driving the AI's decision using LIME, making complex results human-readable.
+- **Financial Health Snapshot**: Real-time DTI (Debt-to-Income) and safety ceiling calculations integrated directly into the dashboard.
+
 
 ## Tech Stack
 - Backend: Python, Flask
