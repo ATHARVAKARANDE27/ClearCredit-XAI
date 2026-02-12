@@ -1,181 +1,142 @@
-// Global function for Card Selection
-window.selectCard = (card, inputId) => {
-    // Update Hidden Input
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.value = card.dataset.value;
-        // Trigger generic change event for validation if needed
-        input.dispatchEvent(new Event('change'));
-    }
-
-    // Update Visuals
-    const siblings = card.parentElement.querySelectorAll('.selection-card');
-    siblings.forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-};
+/* --- ClearCredit XAI | Core Interaction Layer --- */
 
 document.addEventListener('DOMContentLoaded', () => {
+    initStars();
+    initWizard();
+    initFormFormatting();
+});
 
-    // --- Formatting Utils ---
-    const formatCurrency = (num) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0
-        }).format(num);
-    };
+/* --- Star Field Generator --- */
+function initStars() {
+    const field = document.getElementById('starField');
+    if (!field) return;
 
-    // --- Number Input Comma Formatting (for text inputs) ---
-    // Moved up for better organization
-    const numberInputs = document.querySelectorAll('.number-format');
-    numberInputs.forEach(input => {
-        input.addEventListener('input', (e) => {
-            // Remove non-digits
-            let val = e.target.value.replace(/\D/g, '');
-            if (val) {
-                // Add commas
-                e.target.value = parseInt(val).toLocaleString('en-US');
-            }
+    const count = 100;
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        const size = Math.random() * 3 + 1;
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const duration = Math.random() * 3 + 2;
+
+        star.className = 'star';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        star.style.setProperty('--duration', `${duration}s`);
+
+        field.appendChild(star);
+    }
+}
+
+/* --- Multi-step Wizard Logic --- */
+function initWizard() {
+    const form = document.getElementById('riskForm');
+    if (!form) return;
+
+    const steps = Array.from(document.querySelectorAll('.form-step'));
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const progressFill = document.getElementById('progressFill');
+    let currentStep = 0;
+
+    const updateUI = () => {
+        steps.forEach((step, idx) => {
+            step.classList.toggle('active', idx === currentStep);
         });
-    });
 
-    // --- Auto-calculate LTI Ratio ---
-    const incomeInput = document.getElementById('income');
-    const amountInput = document.getElementById('amnt');
-    const ltiInput = document.getElementById('lti');
+        // Update Nav
+        prevBtn.style.visibility = currentStep === 0 ? 'hidden' : 'visible';
 
-    const calculateLTI = () => {
-        const income = parseFloat(incomeInput.value.replace(/[^0-9.]/g, '')) || 0;
-        const amount = parseFloat(amountInput.value.replace(/[^0-9.]/g, '')) || 0;
-
-        if (income > 0) {
-            const ratio = (amount / income).toFixed(2);
-            ltiInput.value = Math.min(ratio, 1.0); // Clamp to 1.0 for the model's standard
+        if (currentStep === steps.length - 1) {
+            nextBtn.style.display = 'none';
         } else {
-            ltiInput.value = "";
+            nextBtn.style.display = 'flex';
+            nextBtn.innerText = 'Next →';
+        }
+
+        // Update Progress
+        const percent = ((currentStep + 1) / steps.length) * 100;
+        progressFill.style.width = `${percent}%`;
+
+        // Auto-calculate LTI if on last step
+        if (currentStep === 2) {
+            calculateLTI();
         }
     };
 
-    if (incomeInput && amountInput && ltiInput) {
-        incomeInput.addEventListener('input', calculateLTI);
-        amountInput.addEventListener('input', calculateLTI);
+    nextBtn.addEventListener('click', () => {
+        if (validateStep(currentStep)) {
+            currentStep++;
+            updateUI();
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        currentStep--;
+        updateUI();
+    });
+
+    form.addEventListener('submit', () => {
+        document.getElementById('loaderOverlay').style.display = 'flex';
+    });
+
+    updateUI();
+}
+
+/* --- Validation --- */
+function validateStep(stepIdx) {
+    const step = document.querySelectorAll('.form-step')[stepIdx];
+    const inputs = step.querySelectorAll('input[required]');
+    let valid = true;
+
+    inputs.forEach(input => {
+        if (!input.value) {
+            valid = false;
+            input.closest('.input-group')?.classList.add('error');
+            // Remove error class on input
+            input.addEventListener('input', () => {
+                input.closest('.input-group')?.classList.remove('error');
+            }, { once: true });
+        }
+    });
+
+    return valid;
+}
+
+/* --- Selection Cards --- */
+window.selectCard = (element, inputId) => {
+    const value = element.getAttribute('data-value');
+    const input = document.getElementById(inputId);
+    input.value = value;
+
+    // UI Updates
+    const grid = element.parentElement;
+    grid.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
+    element.classList.add('selected');
+};
+
+/* --- Form Formatting --- */
+function initFormFormatting() {
+    const numberInputs = document.querySelectorAll('.number-format');
+
+    numberInputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val) {
+                e.target.value = Number(val).toLocaleString();
+            }
+        });
+    });
+}
+
+function calculateLTI() {
+    const income = Number(document.getElementById('income').value.replace(/[^0-9]/g, ''));
+    const loan = Number(document.getElementById('amnt').value.replace(/[^0-9]/g, ''));
+
+    if (income && loan) {
+        const lti = (loan / income).toFixed(2);
+        document.getElementById('lti').value = lti;
     }
-
-    const initWizard = () => {
-        const steps = document.querySelectorAll('.form-step');
-        const stepItems = document.querySelectorAll('.step-item'); // Changed selector
-        const progressFill = document.querySelector('.progress-fill'); // New selector
-        const nextBtn = document.getElementById('nextBtn');
-        const prevBtn = document.getElementById('prevBtn');
-        const submitBtn = document.getElementById('submitBtn');
-        let currentStep = 0;
-
-        if (!steps.length) return;
-
-        const updateWizard = () => {
-            // Update Steps Visibility
-            steps.forEach((step, index) => {
-                if (index === currentStep) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
-
-            // Update Indicators & Progress Bar
-            const progress = (currentStep / (steps.length - 1)) * 100;
-            if (progressFill) {
-                progressFill.style.width = `${progress}%`;
-            }
-
-            stepItems.forEach((item, index) => {
-                const circle = item.querySelector('.step-circle');
-
-                if (index < currentStep) {
-                    item.classList.add('completed');
-                    item.classList.remove('active');
-                    circle.innerHTML = '<i class="fas fa-check"></i>';
-                } else if (index === currentStep) {
-                    item.classList.add('active');
-                    item.classList.remove('completed');
-                    circle.innerHTML = index + 1;
-                } else {
-                    item.classList.remove('active', 'completed');
-                    circle.innerHTML = index + 1;
-                }
-            });
-
-            // Buttons
-            prevBtn.style.display = currentStep === 0 ? 'none' : 'block';
-            if (currentStep === steps.length - 1) {
-                nextBtn.style.display = 'none';
-                submitBtn.parentElement.style.display = 'block'; // Show submit container
-            } else {
-                nextBtn.style.display = 'block';
-                submitBtn.parentElement.style.display = 'none';
-            }
-        };
-
-        nextBtn.addEventListener('click', () => {
-            // Validate current step inputs (including hidden ones)
-            const currentInputs = steps[currentStep].querySelectorAll('input, select');
-            let isValid = true;
-
-            // Check HTML5 validity
-            currentInputs.forEach(input => {
-                if (!input.checkValidity()) {
-                    isValid = false;
-                    input.reportValidity();
-                }
-            });
-
-            // Extra check for hidden inputs (card selection)
-            // reportValidity() doesn't always work on hidden inputs, so we might need a toast/alert
-            // But if 'required' is set on hidden input, checkValidity might return false.
-            // Let's manually check hidden required inputs if checkValidity didn't trigger UI
-            if (isValid) {
-                const hiddenRequired = steps[currentStep].querySelectorAll('input[type="hidden"][required]');
-                hiddenRequired.forEach(input => {
-                    if (!input.value) {
-                        isValid = false;
-                        // Shake animation or alert?
-                        // For now, simpler: Scroll to it or alert
-                        alert("Please select an option to proceed.");
-                    }
-                });
-            }
-
-            if (isValid && currentStep < steps.length - 1) {
-                currentStep++;
-                updateWizard();
-            }
-        });
-
-        prevBtn.addEventListener('click', () => {
-            if (currentStep > 0) {
-                currentStep--;
-                updateWizard();
-            }
-        });
-
-        // Init
-        updateWizard();
-    };
-
-    initWizard();
-
-    // --- Loading Animation ---
-    const form = document.querySelector('form');
-    const submitBtn = document.getElementById('submitBtn');
-
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            if (submitBtn) {
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Analyzing...';
-            }
-        });
-    }
-
-});
+}

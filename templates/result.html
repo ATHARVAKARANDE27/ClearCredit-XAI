@@ -4,415 +4,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Result | ClearCredit XAI</title>
-    <!-- Fonts -->
+    <title>AI Analysis Dashboard | ClearCredit XAI</title>
+    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <!-- Dynamic Background -->
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
+    <div class="stars"></div>
 
-    <header class="app-container slide-in"
-        style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
-        <div></div> <!-- Spacer -->
-        <div class="brand">
-            Clear<span>Credit</span> XAI
+    <nav style="position: relative; background: transparent; backdrop-filter: none;">
+        <div class="brand"><i class="fas fa-circle-info"
+                style="color: var(--color-primary);"></i>Clear<span>Credit</span> XAI</div>
+        <div class="nav-actions">
+            <a href="/" class="btn-nav outline">New Calculation</a>
         </div>
-        <div style="display: flex; justify-content: flex-end;">
-            <a href="/" class="btn-primary" style="width: auto; margin:0; padding: 0.7rem 1.5rem; font-size: 0.9rem;">
-                <i class="fas fa-plus"></i> New Analysis
-            </a>
-        </div>
-    </header>
+    </nav>
 
-    <div class="app-container">
-
-        <!-- Header Section -->
-        <div class="glass-card result-header fade-in-up">
-            <h4>Assessment Complete</h4>
-            <div class="risk-label {{ result }}">
-                {{ result }} Risk
-            </div>
-
-            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
-                <div class="text-center">
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Default Probability</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">{{ probability }}%</div>
-                </div>
-                <div class="text-center">
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Confidence Score</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">High</div>
-                </div>
-            </div>
-        </div>
+    <div class="app-container" style="padding: 2rem 4rem;">
 
         <div class="dashboard-grid">
 
-            <!-- 1. AI Analysis (Key Drivers) -->
-            <div class="glass-card col-span-8 fade-in-up delay-1">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3><i class="fas fa-robot" style="color: var(--accent-color);"></i> &nbsp; AI Analysis &
-                        Recommendations</h3>
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Explainable AI Insights</span>
-                </div>
-
-                <div class="drivers-grid">
-                    {% for item in top_reasons %}
-                    {% set is_risk = item.impact == 'Negative' %}
-                    {% set card_class = 'increase' if is_risk else 'decrease' %}
-
-                    <div class="driver-card {{ card_class }}">
-                        <div class="driver-icon {{ card_class }}">
-                            <i class="fas {{ item.icon }}"></i>
-                        </div>
-                        <div class="driver-content">
-                            <div class="driver-title"
-                                style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">
-                                {{ item.condition }}
-                            </div>
-                            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main); margin: 0.3rem 0;">
-                                {{ item.recommendation }}
-                            </div>
-                            <div class="driver-impact">
-                                {% if is_risk %}
-                                <i class="fas fa-arrow-trend-up"></i> Increases Risk
-                                {% else %}
-                                <i class="fas fa-shield-heart"></i> Strength
-                                {% endif %}
-                            </div>
-                        </div>
+            <!-- Result Overview -->
+            <div class="glass-card col-12 result-card">
+                <span class="subtitle"
+                    style="color: var(--color-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Your
+                    Result</span>
+                <div class="risk-value {{ result }}">{{ result }} Risk</div>
+                <div
+                    style="display: flex; justify-content: center; gap: 4rem; margin-top: 2rem; border-top: 1px solid var(--color-glass-border); padding-top: 2rem;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">
+                            Default Probability</div>
+                        <div style="font-size: 2rem; font-weight: 800;">{{ probability }}%</div>
                     </div>
-                    {% else %}
-                    <div class="driver-card decrease"
-                        style="grid-column: 1 / -1; display:flex; align-items:center; gap: 1rem;">
-                        <div class="driver-icon">
-                            <i class="fas fa-check-circle"></i>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Trust
+                            Score</div>
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--color-risk-low);">98.4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Drivers (LIME) -->
+            <div class="glass-card col-8">
+                <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 15px;">
+                    <i class="fas fa-lightbulb" style="color: var(--color-primary);"></i> What influenced the decision?
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    {% for item in top_reasons %}
+                    <div class="driver-card {{ 'increase' if item.impact == 'Negative' else 'decrease' }}">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <span
+                                style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; opacity: 0.5;">{{
+                                item.factor }}</span>
+                            <i class="fas {{ item.icon }}" style="font-size: 1rem;"></i>
                         </div>
-                        <div class="driver-content">
-                            <div class="driver-title">System Analysis</div>
-                            <div style="font-weight: 600;">No significant risk factors flagged. Standard profile
-                                detected.</div>
+                        <div style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">{{ item.condition }}
                         </div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4;">{{
+                            item.recommendation }}</div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- 2. Risk Gauge Widget -->
-            <div class="glass-card col-span-4 text-center fade-in-up delay-2"
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <h3 style="margin-bottom: 1rem;"><i class="fas fa-tachometer-alt"
-                        style="color: var(--primary-color);"></i> Risk Score</h3>
-                <div style="position: relative; height: 220px; width: 100%;">
+            <!-- Risk Gauge -->
+            <div class="glass-card col-4"
+                style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <h3 style="margin-bottom: 2rem;">Risk Level</h3>
+                <div style="position: relative; height: 250px; width: 100%;">
                     <canvas id="riskGauge"></canvas>
-                    <div style="position: absolute; top: 55%; left: 0; right: 0; text-align: center;">
-                        <span id="risk_gauge_value"
-                            style="font-size: 2.5rem; font-weight: 800; color: var(--text-main);">{{ probability
-                            }}</span>
+                    <div style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);">
+                        <div style="font-size: 3rem; font-weight: 800;">{{ probability }}</div>
+                        <div style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase;">Score
+                        </div>
                     </div>
                 </div>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: -20px;">
-                    0 = Safe, 100 = Default
-                </p>
             </div>
 
-            <!-- 3. What-If Simulator (Interactive) -->
-            <div class="glass-card col-span-8 fade-in-up delay-1">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3><i class="fas fa-sliders-h" style="color: var(--accent-color);"></i> &nbsp; What-If Simulation
-                    </h3>
-                    <button onclick="resetSimulator()" class="btn-primary"
-                        style="width: auto; padding: 0.4rem 1rem; font-size: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
+            <!-- What-If Simulator -->
+            <div class="glass-card col-8">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+                    <h3>Try Different <span>Scenarios</span></h3>
+                    <button onclick="resetSimulator()" class="btn-nav outline" style="font-size: 0.7rem;">Reset
+                        Params</button>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
-                    <div class="simulator-slider">
+                <div class="simulator-controls">
+                    <div>
                         <div style="display: flex; justify-content: space-between;">
-                            <label
-                                style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Loan
-                                Amount ($)</label>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">$</span>
-                                <input type="number" id="sim_loan_amnt_input" min="1000" max="250000" step="1000"
-                                    value="{{ original_data.loan_amnt }}"
-                                    style="width: 85px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color); font-weight: 700; border-radius: 4px; padding: 2px 5px; font-size: 0.85rem; text-align: right;">
-                            </div>
-
+                            <label style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted);">LOAN
+                                AMOUNT ($)</label>
+                            <span id="loan_val_display"
+                                style="font-family: 'Outfit'; font-weight: 800; color: var(--color-primary);">$0</span>
                         </div>
                         <input type="range" id="sim_loan_amnt" min="1000" max="250000" step="1000"
-                            value="{{ original_data.loan_amnt }}"
-                            style="margin:0; accent-color: var(--primary-color); width: 100%;">
-                        <div
-                            style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">
-                            <span>$1k</span>
-                            <span>$250k</span>
-                        </div>
+                            value="{{ original_data.loan_amnt }}">
                     </div>
-
-                    <div class="simulator-slider">
+                    <div>
                         <div style="display: flex; justify-content: space-between;">
-                            <label
-                                style="position:static; display:block; margin-bottom: 0.5rem; font-size: 0.9rem;">Interest
-                                Rate (%)</label>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <input type="number" id="sim_loan_int_rate_input" min="1" max="30" step="0.5"
-                                    value="{{ original_data.loan_int_rate }}"
-                                    style="width: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color); font-weight: 700; border-radius: 4px; padding: 2px 5px; font-size: 0.85rem; text-align: right;">
-                                <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">%</span>
-                            </div>
-
+                            <label style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted);">INTEREST
+                                RATE (%)</label>
+                            <span id="rate_val_display"
+                                style="font-family: 'Outfit'; font-weight: 800; color: var(--color-primary);">0%</span>
                         </div>
                         <input type="range" id="sim_loan_int_rate" min="1" max="30" step="0.5"
-                            value="{{ original_data.loan_int_rate }}"
-                            style="margin:0; accent-color: var(--accent-color); width: 100%;">
-                        <div
-                            style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">
-                            <span>1%</span>
-                            <span>30%</span>
-                        </div>
+                            value="{{ original_data.loan_int_rate }}">
                     </div>
                 </div>
 
-                <div id="simulator_msg"
-                    style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-md); font-size: 0.9rem; border-left: 3px solid var(--accent-color); transition: all 0.3s ease;">
-                    <i class="fas fa-lightbulb"></i> <span id="sim_advice">Adjust sliders to stress-test the model's
-                        prediction.</span>
+                <div id="sim_feedback"
+                    style="margin-top: 3rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border-left: 2px solid var(--color-primary); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> <span id="sim_advice">Calculating risk for these values...</span>
                 </div>
             </div>
 
-            <!-- 4. Financial Health Snapshot (DTI) -->
-            <div class="glass-card col-span-4 fade-in-up delay-2"
-                style="display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-heartbeat" style="color: #ef4444;"></i>
-                        Financial Health</h3>
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <div
-                            style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                            <span style="color: var(--text-muted);">Borrowing Power Index (DTI)</span>
-                            <span id="dti_value" style="font-weight: 700; color: var(--text-main);">0.0%</span>
-                        </div>
-                        <div
-                            style="width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative;">
-                            <div id="dti_bar"
-                                style="height: 100%; background: var(--secondary-color); width: 0%; transition: 0.4s; border-radius: 10px;">
-                            </div>
-                            <div style="position: absolute; left: 36%; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.2);"
-                                title="Warning Threshold"></div>
-                        </div>
-                        <div
-                            style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">
-                            <span>IDEAL</span>
-                            <span style="margin-left: 15%;">LIMIT</span>
-                        </div>
+            <!-- Financial Health -->
+            <div class="glass-card col-4">
+                <h3 style="margin-bottom: 2rem;">Financial Health</h3>
+                <div style="margin-bottom: 3rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <span>DTI RATIO</span>
+                        <span id="dti_value">0%</span>
+                    </div>
+                    <div
+                        style="height: 4px; background: var(--color-glass-border); border-radius: 2px; overflow: hidden;">
+                        <div id="dti_bar"
+                            style="height: 100%; background: var(--color-primary); width: 0%; transition: 0.6s;"></div>
                     </div>
                 </div>
 
-                <div id="offer_box"
-                    style="padding: 1.5rem 1rem; border: 1px solid rgba(16, 185, 129, 0.2); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent); border-radius: var(--radius-md); text-align: center; position: relative; overflow: hidden;">
+                <div
+                    style="background: rgba(255,255,255,0.03); padding: 2rem; border-radius: var(--radius-md); text-align: center;">
                     <div
-                        style="position: absolute; top: -10px; right: -10px; font-size: 4rem; color: rgba(16, 185, 129, 0.05); transform: rotate(15deg);">
-                        <i class="fas fa-award"></i>
+                        style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Estimated Safety Ceiling</div>
+                    <div id="max_loan_val" style="font-size: 2rem; font-weight: 800; color: var(--color-risk-low);">$0
                     </div>
-                    <div
-                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">
-                        Estimated Max Safe Loan</div>
-                    <div id="max_loan_val"
-                        style="font-size: 2rem; font-weight: 800; color: var(--secondary-color); text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">
-                        $0</div>
-                    <div id="dti_status"
-                        style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 600;">
-                        Evaluating Power...</div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- Data injection via attributes to avoid JS linting errors in IDE -->
-    <div id="data-store" data-original='{{ original_data | default({}, true) | tojson | safe }}'
-        data-stats='{{ db_stats | default({}, true) | tojson | safe }}'
-        data-prob='{{ probability | default(0, true) }}'></div>
+    <div id="data-store" data-original='{{ original_data | tojson | safe }}' data-stats='{{ db_stats | tojson | safe }}'
+        data-prob='{{ probability }}'></div>
 
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
-        // Data Extraction from HTML Store (Grounds app in DB-derived stats)
         const store = document.getElementById('data-store');
         const originalData = JSON.parse(store.dataset.original);
         const dbStats = JSON.parse(store.dataset.stats);
         const probOrig = Number(store.dataset.prob);
 
-
-
-
-        // Element Selectors
-        const riskScoreText = document.querySelector('.risk-label');
-        const gaugeValDisplay = document.getElementById('risk_gauge_value');
-
-        const simLoanRange = document.getElementById('sim_loan_amnt');
-        const simRateRange = document.getElementById('sim_loan_int_rate');
-        const simLoanInput = document.getElementById('sim_loan_amnt_input');
-        const simRateInput = document.getElementById('sim_loan_int_rate_input');
-        const dtiStatus = document.getElementById('dti_status');
-
-        // Initialize Gauge Chart
         const ctxGauge = document.getElementById('riskGauge').getContext('2d');
-        const gaugeColor = probOrig > 50 ? '#ef4444' : (probOrig > 20 ? '#f59e0b' : '#10b981');
 
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        let gaugeColor = probOrig > 50 ? '#ff3e3e' : '#00ff88';
 
         const riskGaugeChart = new Chart(ctxGauge, {
             type: 'doughnut',
             data: {
-                labels: ['Risk Score', 'Safe Buffer'],
                 datasets: [{
                     data: [probOrig, 100 - probOrig],
-                    backgroundColor: [gaugeColor, 'rgba(255,255,255,0.03)'],
+                    backgroundColor: [gaugeColor, 'rgba(255,255,255,0.05)'],
                     borderWidth: 0,
-                    borderRadius: 30,
+                    borderRadius: 20,
                     cutout: '85%',
-                    rotation: 235,
-                    circumference: 250
+                    rotation: 225,
+                    circumference: 270
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                }
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
             }
         });
 
-        const resetSimulator = () => {
-            simLoanRange.value = originalData.loan_amnt;
-            simLoanInput.value = originalData.loan_amnt;
-            simRateRange.value = originalData.loan_int_rate;
-            simRateInput.value = originalData.loan_int_rate;
-            runSimulation();
-        };
+        // Simulator Logic
+        const loanRange = document.getElementById('sim_loan_amnt');
+        const rateRange = document.getElementById('sim_loan_int_rate');
+        const loanDisplay = document.getElementById('loan_val_display');
+        const rateDisplay = document.getElementById('rate_val_display');
 
-        const updateRiskUI = (data) => {
+        const updateSimUI = (data) => {
             riskGaugeChart.data.datasets[0].data = [data.probability, 100 - data.probability];
-            riskGaugeChart.data.datasets[0].backgroundColor[0] = data.probability > 50 ? '#ef4444' : (data.probability > 20 ? '#f59e0b' : '#10b981');
+            riskGaugeChart.data.datasets[0].backgroundColor[0] = data.probability > 50 ? '#ff3e3e' : '#00ff88';
             riskGaugeChart.update();
 
-            gaugeValDisplay.innerText = data.probability;
-            riskScoreText.innerText = data.result + " Risk";
-            riskScoreText.className = "risk-label " + data.result;
-
-            const adviceBox = document.getElementById('simulator_msg');
-            const adviceText = document.getElementById('sim_advice');
-            adviceBox.style.display = 'block';
-
+            const advice = document.getElementById('sim_advice');
             if (data.result === 'High') {
-                adviceText.innerText = "Current loan parameters result in a High Risk classification. Explore adjusted terms.";
-                adviceBox.style.borderLeftColor = "#ef4444";
+                advice.innerText = "These values make the loan high risk. The model thinks a default is likely.";
+                document.getElementById('sim_feedback').style.borderLeftColor = '#ff3e3e';
             } else {
-                adviceText.innerText = "Low Risk parameters achieved. These terms align with a safe credit profile.";
-                adviceBox.style.borderLeftColor = "#10b981";
+                advice.innerText = "These values look safe. The model predicts a low risk of default.";
+                document.getElementById('sim_feedback').style.borderLeftColor = '#00ff88';
             }
-        };
-
-        const calculateFinancials = () => {
-            const loan = Number(simLoanInput.value);
-            const rate = Number(simRateInput.value) / 100 / 12;
-            const income = originalData.person_income / 12;
-
-            // EMI Calculation for 5-year term
-            const emi = loan * rate * Math.pow(1 + rate, 60) / (Math.pow(1 + rate, 60) - 1);
-            const dti = (emi / income) * 100;
-
-            // Database-derived Thresholds (using LTI percent from DB as proxy for safe DTI)
-            const safeThreshold = (dbStats.avg_lti_approved || 0.15) * 100 * 1.5; // Avg * 1.5 cushion
-            const warningThreshold = (dbStats.p75_lti_approved || 0.20) * 100 * 1.8; // P75 * 1.8 cushion
-
-            document.getElementById('dti_value').innerText = dti.toFixed(1) + "%";
-            const dtiBar = document.getElementById('dti_bar');
-            dtiBar.style.width = Math.min(dti, 100) + "%";
-
-            if (dti > warningThreshold) {
-                dtiBar.style.background = '#ef4444';
-                dtiStatus.innerText = "Above Database Average Risk";
-                dtiStatus.style.color = '#ef4444';
-            } else if (dti > safeThreshold) {
-                dtiBar.style.background = '#f59e0b';
-                dtiStatus.innerText = "Approaching Data Limits";
-                dtiStatus.style.color = '#f59e0b';
-            } else {
-                dtiBar.style.background = '#10b981';
-                dtiStatus.innerText = "Below Database Risk Average";
-                dtiStatus.style.color = '#10b981';
-            }
-
-            // Estimate Max Loan based on Database Average Approved LTI
-            const maxLoan = income * (dbStats.p75_lti_approved || 0.20) * 12; // Yearly income * P75 LTI
-            document.getElementById('max_loan_val').innerText = "$" + Math.floor(maxLoan).toLocaleString();
-
         };
 
         const runSimulation = async () => {
-            const updatedData = { ...originalData };
-            updatedData.loan_amnt = simLoanInput.value;
-            updatedData.loan_int_rate = simRateInput.value;
+            loanDisplay.innerText = "$" + Number(loanRange.value).toLocaleString();
+            rateDisplay.innerText = rateRange.value + "%";
 
-
-            // Recalculate loan-to-income ratio (crucial for model consistency)
-            updatedData.loan_percent_income = (Number(updatedData.loan_amnt) / Number(updatedData.person_income)).toFixed(2);
-
-
-            calculateFinancials();
+            const updated = { ...originalData };
+            updated.loan_amnt = loanRange.value;
+            updated.loan_int_rate = rateRange.value;
+            updated.loan_percent_income = (Number(updated.loan_amnt) / Number(updated.person_income)).toFixed(2);
 
             try {
-                const response = await fetch('/predict_api', {
+                const res = await fetch('/predict_api', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData)
+                    body: JSON.stringify(updated)
                 });
-                const data = await response.json();
-                updateRiskUI(data);
-            } catch (err) {
-                console.error("Simulation failed:", err);
-            }
+                const data = await res.json();
+                updateSimUI(data);
+                calculateFinancials();
+            } catch (e) { }
         };
 
-        // Sync Range -> Number
-        simLoanRange.addEventListener('input', (e) => {
-            simLoanInput.value = e.target.value;
-            runSimulation();
-        });
-        simRateRange.addEventListener('input', (e) => {
-            simRateInput.value = e.target.value;
-            runSimulation();
-        });
+        const calculateFinancials = () => {
+            const loan = Number(loanRange.value);
+            const income = originalData.person_income / 12;
+            const rate = Number(rateRange.value) / 100 / 12;
+            const emi = loan * rate * Math.pow(1 + rate, 60) / (Math.pow(1 + rate, 60) - 1);
+            const dti = (emi / income) * 100;
 
-        // Sync Number -> Range
-        simLoanInput.addEventListener('input', (e) => {
-            simLoanRange.value = e.target.value;
-            runSimulation();
-        });
-        simRateInput.addEventListener('input', (e) => {
-            simRateRange.value = e.target.value;
-            runSimulation();
-        });
+            document.getElementById('dti_value').innerText = dti.toFixed(1) + "%";
+            document.getElementById('dti_bar').style.width = Math.min(dti, 100) + "%";
 
-        // Initial setup
-        calculateFinancials();
+            const maxLoan = (originalData.person_income / 12) * (dbStats.p75_lti_approved || 0.20) * 12;
+            document.getElementById('max_loan_val').innerText = "$" + Math.floor(maxLoan).toLocaleString();
+        };
+
+        const resetSimulator = () => {
+            loanRange.value = originalData.loan_amnt;
+            rateRange.value = originalData.loan_int_rate;
+            runSimulation();
+        };
+
+        loanRange.addEventListener('input', runSimulation);
+        rateRange.addEventListener('input', runSimulation);
+
+        runSimulation();
     </script>
 </body>
 

@@ -4,102 +4,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClearCredit XAI | AI Risk Assessment</title>
-    <!-- Fonts -->
+    <title>ClearCredit XAI | Simple Credit Risk Analysis</title>
+    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
         rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
+    <!-- Main Style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <!-- Dynamic Background -->
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
+    <!-- Twinkling Star Background -->
+    <div class="stars" id="starField"></div>
 
-    <!-- Loading Overlay -->
-    <div id="loaderOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text">Analyzing Risk Profile...</div>
-    </div>
-
-    <header class="app-container fade-in-up" style="justify-content: center;">
-        <div class="brand">
-            <div>Clear<span>Credit</span> XAI</div>
+    <!-- Navigation -->
+    <nav>
+        <div class="brand"><i class="fas fa-circle-info"
+                style="color: var(--color-primary);"></i>Clear<span>Credit</span> XAI</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Products</a>
+            <a href="#">Contact Us</a>
         </div>
-    </header>
+        <div class="nav-actions">
+            <a href="#" class="btn-nav outline">Sign Up</a>
+            <a href="#" class="btn-nav outline" style="background: white; color: black;">Login</a>
+        </div>
+    </nav>
 
-    <div class="app-container fade-in-up delay-1">
-        <div class="glass-card">
-            <h1 class="text-center mb-4">New Application Analysis</h1>
-
-            <!-- Wizard Indicators -->
-            <div class="wizard-steps">
-                <div class="progress-track">
-                    <div class="progress-fill"></div>
-                </div>
-
-                <div class="step-item active">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">Profile</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle">2</div>
-                    <div class="step-label">Loan</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">History</div>
-                </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="subtitle">Explainable AI</span>
+            <h1>ClearCredit XAI</h1>
+            <p>
+                Predict loan risk with clarity. Our AI helps you understand why a credit decision was made, simply and
+                clearly.
+            </p>
+            <div style="display: flex; gap: 1.5rem;">
+                <button class="btn-premium primary" onclick="scrollToWizard()">Get Started <i
+                        class="fas fa-chevron-right"></i></button>
+                <button class="btn-premium">View Demo</button>
             </div>
+        </div>
+        <div class="hero-visual">
+            <!-- Ensure to place visual.png in static folder -->
+            <img src="{{ url_for('static', filename='visual.png') }}" alt="AI Visualization"
+                onerror="this.style.display='none'; document.getElementById('visual-fallback').style.display='block';">
+            <div id="visual-fallback"
+                style="display:none; width: 100%; height: 100%; background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%); border-radius: 50%; filter: blur(40px);">
+            </div>
+        </div>
+    </section>
 
-            <form action="/predict" method="post" id="riskForm">
+    <!-- Wizard Section -->
+    <section class="wizard-section" id="wizard">
+        <div class="wizard-container">
+            <div class="glass-card">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressFill"></div>
+                </div>
 
-                <!-- Step 1: Personal Profile -->
-                <div class="form-step active">
-                    <h3 style="margin-bottom: 2rem; font-weight: 600;">Tell us about yourself</h3>
-                    <div class="form-grid">
-                        <!-- Age -->
-                        <div class="input-wrapper">
+                <div style="margin-bottom: 3rem;">
+                    <h2 style="font-size: 2rem;">Check Credit <span>Risk</span></h2>
+                    <p style="color: var(--color-text-muted);">Please fill in the details below to check the risk level.
+                    </p>
+                </div>
+
+                <form action="/predict" method="post" id="riskForm">
+                    <!-- Step 1: Profile -->
+                    <div class="form-step active">
+                        <div class="input-row">
                             <div class="input-group">
-                                <input type="number" name="person_age" id="age" placeholder=" " required min="18"
-                                    max="100">
                                 <label for="age">Applicant Age</label>
-                                <i class="fas fa-birthday-cake input-icon"></i>
+                                <input type="number" name="person_age" id="age" required min="18" max="100"
+                                    placeholder="e.g. 30">
                             </div>
-                        </div>
-
-                        <!-- Employment Length -->
-                        <div class="input-wrapper">
                             <div class="input-group">
-                                <input type="number" step="0.1" name="person_emp_length" id="emp" placeholder=" "
-                                    required min="0">
                                 <label for="emp">Employment Length (Years)</label>
-                                <i class="fas fa-briefcase input-icon"></i>
+                                <input type="number" step="0.1" name="person_emp_length" id="emp" required min="0"
+                                    placeholder="e.g. 5">
                             </div>
                         </div>
 
-                        <!-- Income -->
-                        <div class="input-wrapper">
-                            <div class="input-group">
-                                <input type="text" name="person_income" id="income" class="number-format"
-                                    placeholder=" " required style="padding-left: 2.5rem;">
-                                <label for="income" style="left: 2.5rem;">Annual Income</label>
-                                <span class="input-prefix">$</span>
-                            </div>
+                        <div class="input-group" style="margin-bottom: 3rem;">
+                            <label for="income">Annual Income ($)</label>
+                            <input type="text" name="person_income" id="income" class="number-format" required
+                                placeholder="e.g. 60,000">
                         </div>
-                    </div>
 
-                    <!-- Home Ownership (Card Grid) -->
-                    <div style="margin-top: 2rem;">
                         <label
-                            style="position: relative; top: 0; left: 0; margin-bottom: 1rem; color: var(--text-main);">Home
-                            Ownership Status</label>
+                            style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted);">Home
+                            Ownership</label>
                         <input type="hidden" name="person_home_ownership" id="home_ownership" required>
-                        <div class="selection-grid" id="home_ownership_grid">
+                        <div class="selection-grid">
                             <div class="selection-card" data-value="RENT" onclick="selectCard(this, 'home_ownership')">
                                 <i class="fas fa-building"></i>
                                 <span>Rent</span>
@@ -113,22 +114,26 @@
                                 <i class="fas fa-file-contract"></i>
                                 <span>Mortgage</span>
                             </div>
-                            <div class="selection-card" data-value="OTHER" onclick="selectCard(this, 'home_ownership')">
-                                <i class="fas fa-question-circle"></i>
-                                <span>Other</span>
-                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Step 2: Loan Details -->
-                <div class="form-step">
-                    <h3 style="margin-bottom: 2rem; font-weight: 600;">Loan Information</h3>
+                    <!-- Step 2: Loan -->
+                    <div class="form-step">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="amnt">Loan Amount ($)</label>
+                                <input type="text" name="loan_amnt" id="amnt" class="number-format" required
+                                    placeholder="e.g. 10,000">
+                            </div>
+                            <div class="input-group">
+                                <label for="rate">Interest Rate (%)</label>
+                                <input type="number" step="0.01" name="loan_int_rate" id="rate" required min="1"
+                                    max="100" placeholder="e.g. 12.5">
+                            </div>
+                        </div>
 
-                    <!-- Loan Intent (Card Grid) -->
-                    <div style="margin-bottom: 2rem;">
                         <label
-                            style="position: relative; top: 0; left: 0; margin-bottom: 1rem; color: var(--text-main);">Loan
+                            style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted);">Loan
                             Purpose</label>
                         <input type="hidden" name="loan_intent" id="loan_intent" required>
                         <div class="selection-grid">
@@ -149,153 +154,109 @@
                                 <i class="fas fa-rocket"></i>
                                 <span>Venture</span>
                             </div>
-                            <div class="selection-card" data-value="HOMEIMPROVEMENT"
-                                onclick="selectCard(this, 'loan_intent')">
-                                <i class="fas fa-paint-roller"></i>
-                                <span>Home Imp.</span>
-                            </div>
-                            <div class="selection-card" data-value="DEBTCONSOLIDATION"
-                                onclick="selectCard(this, 'loan_intent')">
-                                <i class="fas fa-wallet"></i>
-                                <span>Debt</span>
+                        </div>
+
+                        <div style="margin-top: 2rem;">
+                            <label
+                                style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted);">Risk
+                                Grade (Estimated)</label>
+                            <input type="hidden" name="loan_grade" id="loan_grade" required>
+                            <div class="selection-grid" style="grid-template-columns: repeat(7, 1fr);">
+                                <div class="selection-card" data-value="A" onclick="selectCard(this, 'loan_grade')">
+                                    <span>A</span>
+                                </div>
+                                <div class="selection-card" data-value="B" onclick="selectCard(this, 'loan_grade')">
+                                    <span>B</span>
+                                </div>
+                                <div class="selection-card" data-value="C" onclick="selectCard(this, 'loan_grade')">
+                                    <span>C</span>
+                                </div>
+                                <div class="selection-card" data-value="D" onclick="selectCard(this, 'loan_grade')">
+                                    <span>D</span>
+                                </div>
+                                <div class="selection-card" data-value="E" onclick="selectCard(this, 'loan_grade')">
+                                    <span>E</span>
+                                </div>
+                                <div class="selection-card" data-value="F" onclick="selectCard(this, 'loan_grade')">
+                                    <span>F</span>
+                                </div>
+                                <div class="selection-card" data-value="G" onclick="selectCard(this, 'loan_grade')">
+                                    <span>G</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-grid">
-                        <!-- Loan Amount -->
-                        <div class="input-wrapper">
+                    <!-- Step 3: Risk Hist -->
+                    <div class="form-step">
+                        <div class="input-row">
                             <div class="input-group">
-                                <input type="text" name="loan_amnt" id="amnt" class="number-format" placeholder=" "
-                                    required style="padding-left: 2.5rem;">
-                                <label for="amnt" style="left: 2.5rem;">Loan Amount</label>
-                                <span class="input-prefix">$</span>
+                                <label for="lti">Loan-to-Income (Auto)</label>
+                                <input type="number" step="0.01" name="loan_percent_income" id="lti" required readonly
+                                    style="opacity: 0.5;">
                             </div>
-                        </div>
-
-                        <!-- Interest Rate -->
-                        <div class="input-wrapper">
                             <div class="input-group">
-                                <input type="number" step="0.01" name="loan_int_rate" id="rate" placeholder=" " required
-                                    min="1" max="100">
-                                <label for="rate">Interest Rate (%)</label>
-                                <i class="fas fa-percent input-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Loan Grade (Mini Grid) -->
-                    <div style="margin-top: 1.5rem;">
-                        <label
-                            style="position: relative; top: 0; left: 0; margin-bottom: 1rem; color: var(--text-main);">Projected
-                            Loan Grade</label>
-                        <input type="hidden" name="loan_grade" id="loan_grade" required>
-                        <div class="selection-grid" style="grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));">
-                            <div class="selection-card" data-value="A" onclick="selectCard(this, 'loan_grade')">
-                                <span>A</span>
-                            </div>
-                            <div class="selection-card" data-value="B" onclick="selectCard(this, 'loan_grade')">
-                                <span>B</span>
-                            </div>
-                            <div class="selection-card" data-value="C" onclick="selectCard(this, 'loan_grade')">
-                                <span>C</span>
-                            </div>
-                            <div class="selection-card" data-value="D" onclick="selectCard(this, 'loan_grade')">
-                                <span>D</span>
-                            </div>
-                            <div class="selection-card" data-value="E" onclick="selectCard(this, 'loan_grade')">
-                                <span>E</span>
-                            </div>
-                            <div class="selection-card" data-value="F" onclick="selectCard(this, 'loan_grade')">
-                                <span>F</span>
-                            </div>
-                            <div class="selection-card" data-value="G" onclick="selectCard(this, 'loan_grade')">
-                                <span>G</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Step 3: Financial History -->
-                <div class="form-step">
-                    <h3 style="margin-bottom: 2rem; font-weight: 600;">Financial Background</h3>
-
-                    <div class="form-grid">
-                        <!-- LTI Ratio -->
-                        <div class="input-wrapper">
-                            <div class="input-group">
-                                <input type="number" step="0.01" max="1" min="0" name="loan_percent_income" id="lti"
-                                    placeholder=" " required readonly
-                                    style="background: rgba(255,255,255,0.02); cursor: not-allowed;">
-                                <label for="lti">Loan-to-Income Ratio (Auto-calculated)</label>
-                                <i class="fas fa-balance-scale input-icon"></i>
-
-                            </div>
-                        </div>
-
-                        <!-- Credit Hist Length -->
-                        <div class="input-wrapper">
-                            <div class="input-group">
-                                <input type="number" name="cb_person_cred_hist_length" id="hist" placeholder=" "
-                                    required min="0">
                                 <label for="hist">Credit History (Years)</label>
-                                <i class="fas fa-history input-icon"></i>
+                                <input type="number" name="cb_person_cred_hist_length" id="hist" required min="0"
+                                    placeholder="e.g. 15">
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Default History (Switch style) -->
-                    <div style="margin-top: 2rem;">
                         <label
-                            style="position: relative; top: 0; left: 0; margin-bottom: 1rem; color: var(--text-main);">Have
-                            you defaulted before?</label>
+                            style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted);">Prior
+                            Default History</label>
                         <input type="hidden" name="cb_person_default_on_file" id="default_hist" required>
-                        <div class="selection-grid" style="max-width: 400px; margin: 1rem auto;">
+                        <div class="selection-grid"
+                            style="grid-template-columns: 1fr 1fr; max-width: 400px; margin: 1.5rem auto;">
                             <div class="selection-card" data-value="N" onclick="selectCard(this, 'default_hist')">
-                                <i class="fas fa-check-circle" style="color: var(--secondary-color);"></i>
-                                <span>No, Never</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>No Defaults</span>
                             </div>
                             <div class="selection-card" data-value="Y" onclick="selectCard(this, 'default_hist')">
-                                <i class="fas fa-exclamation-circle" style="color: var(--primary-color);"></i>
-                                <span>Yes, I have</span>
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Has Defaults</span>
                             </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 4rem;">
+                            <button type="submit" class="btn-premium primary"
+                                style="width: 100%; justify-content: center;">Check Risk</button>
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <div class="text-center" style="margin-top: 3rem; display: none;">
-                        <button type="submit" class="btn-primary" id="submitBtn">
-                            Assess Risk Profile <i class="fas fa-shield-alt"></i>
-                        </button>
-                        <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
-                            <i class="fas fa-lock"></i> Encryption End-to-End
-                        </p>
+                    <div
+                        style="display: flex; justify-content: space-between; margin-top: 4rem; border-top: 1px solid var(--color-glass-border); padding-top: 2rem;">
+                        <button type="button" class="btn-nav outline" id="prevBtn"><i class="fas fa-arrow-left"></i>
+                            Previous</button>
+                        <button type="button" class="btn-nav outline" style="background: white; color: black;"
+                            id="nextBtn">Next <i class="fas fa-arrow-right"></i></button>
                     </div>
-                </div>
-
-                <!-- Wizard Navigation -->
-                <div class="wizard-nav">
-                    <button type="button" class="btn-primary" id="prevBtn"
-                        style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <button type="button" class="btn-primary" id="nextBtn">
-                        Next Step <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-
-            </form>
+                </form>
+            </div>
         </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="#">Legal</a>
+            <a href="#">Privacy Center</a>
+            <a href="#">Cookie Policy</a>
+            <a href="#">About Ads</a>
+        </div>
+        <div>© 2026 ClearCredit XAI. All rights reserved.</div>
+    </footer>
+
+    <!-- Loader -->
+    <div id="loaderOverlay">
+        <div class="loader-spiral"></div>
+        <div style="font-family: 'Outfit'; font-weight: 700; letter-spacing: 2px;">ANALYZING RISK...</div>
     </div>
 
-    <!-- Script -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
-        // Inline script for specific page checks if needed, but mostly in script.js
-        document.getElementById('riskForm').addEventListener('submit', function () {
-            document.getElementById('loaderOverlay').style.display = 'flex';
-        });
+        function scrollToWizard() {
+            document.getElementById('wizard').scrollIntoView({ behavior: 'smooth' });
+        }
     </script>
 </body>
 
