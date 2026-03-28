@@ -123,10 +123,12 @@ def compute_local_importance(form_data, base_proba):
     the model. The change in probability tells us the TRUE direction:
 
       impact = base_proba - counterfactual_proba
-      impact > 0  →  real value REDUCES risk vs neutral  →  Positive (good)
-      impact < 0  →  real value INCREASES risk vs neutral →  Negative (bad)
+      impact < 0  →  real value gives LOWER risk than neutral  →  Positive (good)
+      impact > 0  →  real value gives HIGHER risk than neutral →  Negative (bad)
 
-    Score = rf_importance × impact  (weighted by global importance)
+    Score = rf_importance × impact
+      score < 0  →  Positive (feature is reducing risk)
+      score > 0  →  Negative (feature is increasing risk)
     """
     scores = {}
     for feat in feature_names:
@@ -214,9 +216,9 @@ def predict():
 
             risk_analysis = []
             for raw_feature, score in top_features:
-                # score > 0 → feature REDUCES risk vs neutral → Positive (good for applicant)
-                # score < 0 → feature INCREASES risk vs neutral → Negative (bad for applicant)
-                is_risk = score < 0
+                # score < 0 → real value lowers risk vs neutral → Positive (good for applicant)
+                # score > 0 → real value raises risk vs neutral → Negative (bad for applicant)
+                is_risk = score > 0
                 impact_type = "Negative" if is_risk else "Positive"
                 human_name = feature_map.get(raw_feature, raw_feature)
                 actual_value = form_data.get(raw_feature, '')
@@ -279,7 +281,7 @@ def predict():
                     elif raw_feature == 'cb_person_default_on_file':
                         recommendation = "Past defaults are a major flag. Consistent on-time payments are needed to rebuild trust."
                     elif raw_feature == 'person_home_ownership':
-                        recommendation = "Lack of property assets reduces collateral options."
+                        recommendation = "Renting or lack of property reduces collateral options for lenders."
                     elif raw_feature == 'loan_grade':
                         recommendation = "The assigned grade suggests high risk. A secured loan might be a better option."
                     else:
@@ -296,6 +298,8 @@ def predict():
                         recommendation = "Healthy debt-to-income ratio shows good financial management."
                     elif raw_feature == 'loan_grade':
                         recommendation = "Excellent loan grade reflects a strong borrower profile."
+                    elif raw_feature == 'person_home_ownership':
+                        recommendation = "Property ownership signals financial stability and reduces lender risk."
                     else:
                         recommendation = "This factor strengthens the application."
 
