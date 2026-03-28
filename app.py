@@ -271,35 +271,49 @@ def predict():
                 if is_risk:
                     action_icon = "fa-triangle-exclamation"
                     if raw_feature == 'loan_amnt':
-                        recommendation = "Consider lowering the loan amount slightly to improve approval chances."
+                        recommendation = "Consider lowering the loan amount to improve approval chances."
                     elif raw_feature == 'person_income':
                         recommendation = "Income level is a constraint. A co-signer or proof of additional income may help."
                     elif raw_feature == 'loan_int_rate':
-                        recommendation = "High interest rate reflects perceived risk. Improving credit score is key."
+                        recommendation = "A high interest rate signals elevated perceived risk. Improving your credit score can help lower it."
                     elif raw_feature == 'loan_percent_income':
-                        recommendation = "Debt-to-Income ratio is high. Paying off smaller existing debts could help."
+                        recommendation = "Debt-to-Income ratio is high. Paying off smaller existing debts first could help."
                     elif raw_feature == 'cb_person_default_on_file':
                         recommendation = "Past defaults are a major flag. Consistent on-time payments are needed to rebuild trust."
                     elif raw_feature == 'person_home_ownership':
-                        recommendation = "Renting or lack of property reduces collateral options for lenders."
+                        recommendation = "Renting or lack of property ownership reduces available collateral for lenders."
                     elif raw_feature == 'loan_grade':
-                        recommendation = "The assigned grade suggests high risk. A secured loan might be a better option."
+                        recommendation = "The assigned loan grade signals elevated risk. A secured loan may be a better option."
+                    elif raw_feature == 'person_emp_length':
+                        recommendation = "Short employment history can be a concern. Demonstrating job stability over time will help."
+                    elif raw_feature == 'person_age':
+                        recommendation = "Age profile raises some risk considerations relative to the typical approved applicant."
+                    elif raw_feature == 'cb_person_cred_hist_length':
+                        recommendation = "A shorter credit history limits the lender's ability to assess repayment reliability."
                     else:
                         recommendation = "This factor negatively impacts the risk profile."
                 else:
                     action_icon = "fa-check-double"
                     if raw_feature == 'person_income':
-                        recommendation = "Strong income level supports this loan application."
+                        recommendation = "Strong income level is a key strength supporting this loan application."
                     elif raw_feature == 'person_emp_length':
-                        recommendation = "Employment stability is a significant strength."
+                        recommendation = "Long-term employment stability is a significant positive indicator."
                     elif raw_feature == 'cb_person_default_on_file':
-                        recommendation = "Clean credit history is a strong positive indicator."
+                        recommendation = "A clean credit record with no prior defaults is a strong green flag."
                     elif raw_feature == 'loan_percent_income':
-                        recommendation = "Healthy debt-to-income ratio shows good financial management."
+                        recommendation = "Healthy Debt-to-Income ratio demonstrates good financial discipline."
                     elif raw_feature == 'loan_grade':
-                        recommendation = "Excellent loan grade reflects a strong borrower profile."
+                        recommendation = "Excellent loan grade reflects a strong, reliable borrower profile."
                     elif raw_feature == 'person_home_ownership':
                         recommendation = "Property ownership signals financial stability and reduces lender risk."
+                    elif raw_feature == 'loan_amnt':
+                        recommendation = "A modest loan amount relative to profile makes this a manageable request."
+                    elif raw_feature == 'loan_int_rate':
+                        recommendation = "A low interest rate reflects good credit standing and lower perceived risk."
+                    elif raw_feature == 'person_age':
+                        recommendation = "Age profile aligns well with typical low-risk applicants."
+                    elif raw_feature == 'cb_person_cred_hist_length':
+                        recommendation = "A long credit history provides lenders with strong repayment track record evidence."
                     else:
                         recommendation = "This factor strengthens the application."
 
