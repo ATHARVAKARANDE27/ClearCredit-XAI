@@ -1,43 +1,45 @@
-# ClearCredit XAI 
-
-## Problem Statement
-Financial institutions must assess loan applicants quickly while maintaining transparency and regulatory explainability. Traditional models often fail to clearly justify why a customer is approved or rejected.
+# ClearCredit XAI
 
 ## Project Overview
-This project is an end-to-end ClearCredit XAI web application that predicts whether a loan applicant is High Risk or Low Risk, estimates the probability of default, and provides explainable reasons behind each decision using LIME (Local Interpretable Model-agnostic Explanations).
+This project is an end-to-end credit risk prediction system that classifies loan applicants as High Risk or Low Risk, estimates probability of default, and provides explainable insights for each decision.
 
-## Business Value
-- Enables faster, consistent credit decisions: Automating the initial screening process.
-- Supports regulator-friendly explainability: Provides clear justification for loan decisions.
-- Reduces manual underwriting effort: Allows experts to focus on complex cases.
-- Automated Financial Calculations: Real-time LTI and DTI estimation grounded in historical data.
-- Helps risk teams prioritize high-risk applicants: Visual dashboards highlighting critical risk factors.
+## Business Objective
+Financial institutions require fast and reliable credit decisions while ensuring transparency and regulatory compliance.
+This project addresses that by combining predictive modeling with explainability techniques to support informed and auditable decision-making.
 
-## Core Highlights
-- **Obsidian & Orange UI**: A premium, futuristic dark-themed interface designed for clarity and a professional feel.
-- **Interactive "Alternative Realities" Simulator**: A dynamic "What-If" tool that allows users to adjust loan parameters and see risk changes in real-time.
-- **Neural Insights (XAI)**: Visualizes the exact factors driving the AI's decision using LIME, making complex results human-readable.
-- **Financial Health Snapshot**: Real-time DTI (Debt-to-Income) and safety ceiling calculations integrated directly into the dashboard.
-
+## Key Features
+- Predicts applicant risk category and probability of default
+- Provides clear explanation of individual predictions using Dependency-Free Counterfactual Explainability
+- Calculates financial indicators such as Debt-to-Income (DTI) ratio
+- Interactive web interface for real-time prediction and analysis
 
 ## Tech Stack
-- Backend: Python, Flask
-- Machine Learning: Scikit-learn, LIME
-- Frontend: HTML, CSS, JavaScript (Vanilla)
-- Data: [Kaggle Credit Risk Dataset](https://www.kaggle.com/datasets/laotse/credit-risk-dataset) (Historical data)
+- **Backend:** Python, Flask
+- **Machine Learning:** Scikit-learn, Random Forest Feature Importances
+- **Frontend:** HTML, CSS, JavaScript
+- **Dataset:** Kaggle Credit Risk Dataset
 
 ## Model Development
-- Models evaluated: Logistic Regression, Decision Tree, Random Forest.
-- Metric used: F1-Score, prioritizing the balance between detecting risky borrowers and minimizing false positives.
-- Final model: Random Forest.
+- Performed data cleaning and preprocessing on historical credit data
+- Engineered features such as Debt-to-Income ratio to capture financial risk
+- Trained and compared models: Logistic Regression, Decision Tree, Random Forest
+- Selected Random Forest based on superior F1-score performance
+- Evaluated model using Precision, Recall, and F1-score
 
 ## Explainability
-For applicants flagged as High Risk, LIME identifies the most influential features (e.g., income level, loan amount, credit history) that contributed to the decision, enabling transparent and interpretable outcomes.
+Counterfactual Explanations and local feature deviations are used alongside Random Forest's native feature importances to explain individual predictions by identifying the most influential features (e.g., income, loan amount, credit history).
+This improves transparency and supports regulatory compliance in credit decision-making without relying on heavy external dependencies.
 
-## Limitations and Future Enhancements
-- Uses static historical data (no real-time bureau integration).
-- Does not account for behavioral changes over time.
-- Future Scope: Includes model monitoring, fairness checks, and drift detection.
+## Deployment
+The model is deployed using Flask, allowing users to input applicant details through a web interface and receive:
+- Risk classification
+- Probability of default
+- Explanation of key contributing factors
+
+## Limitations & Future Scope
+- Uses static historical data (no real-time data integration)
+- Does not account for behavioral or time-based changes
+- Future improvements: model monitoring, fairness analysis, and drift detection
 
 ---
 
