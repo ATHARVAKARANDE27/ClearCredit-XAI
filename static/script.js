@@ -78,7 +78,11 @@ function initWizard() {
         updateUI();
     });
 
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', (e) => {
+        if (!validateStep(currentStep)) {
+            e.preventDefault();
+            return;
+        }
         document.getElementById('loaderOverlay').style.display = 'flex';
     });
 
@@ -94,11 +98,17 @@ function validateStep(stepIdx) {
     inputs.forEach(input => {
         if (!input.value) {
             valid = false;
-            input.closest('.input-group')?.classList.add('error');
-            // Remove error class on input
-            input.addEventListener('input', () => {
-                input.closest('.input-group')?.classList.remove('error');
-            }, { once: true });
+            
+            // Check if it's a hidden input driving a selection-grid
+            const nextEl = input.nextElementSibling;
+            if (nextEl && nextEl.classList.contains('selection-grid')) {
+                nextEl.classList.add('error');
+            } else {
+                input.closest('.input-group')?.classList.add('error');
+                input.addEventListener('input', () => {
+                    input.closest('.input-group')?.classList.remove('error');
+                }, { once: true });
+            }
         }
     });
 
@@ -113,6 +123,7 @@ window.selectCard = (element, inputId) => {
 
     // UI Updates
     const grid = element.parentElement;
+    grid.classList.remove('error'); // Clear any validation errors
     grid.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
     element.classList.add('selected');
 };

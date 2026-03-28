@@ -351,6 +351,14 @@ nav {
     outline: none;
 }
 
+.input-group.error {
+    border-bottom-color: var(--color-risk-high);
+}
+
+.input-group.error label {
+    color: var(--color-risk-high);
+}
+
 /* Force dark background on autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -367,6 +375,14 @@ input:-webkit-autofill:active {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
     margin-top: 1.5rem;
+    transition: var(--transition-fast);
+}
+
+.selection-grid.error {
+    border: 1px solid var(--color-risk-high) !important;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    background: rgba(255, 62, 62, 0.05);
 }
 
 .selection-card {
