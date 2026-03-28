@@ -116,35 +116,39 @@ def initialize_app():
 initialize_app()
 
 
-# --- Local Explainer: compute per-prediction feature scores ---
-def compute_local_importance(form_data):
+# --- Local Explainer: counterfactual-based per-prediction importance ---
+def compute_local_importance(form_data, base_proba):
     """
-    Returns a sorted list of (feature, signed_score) tuples.
-    Score = global_importance * normalised_deviation_from_training_mean.
-    Positive score  -> pushes toward High Risk.
-    Negative score  -> pushes toward Low Risk.
+    For each feature, replace it with its training median/mode and re-run
+    the model. The change in probability tells us the TRUE direction:
+
+      impact = base_proba - counterfactual_proba
+      impact > 0  →  real value REDUCES risk vs neutral  →  Positive (good)
+      impact < 0  →  real value INCREASES risk vs neutral →  Negative (bad)
+
+    Score = rf_importance × impact  (weighted by global importance)
     """
     scores = {}
     for feat in feature_names:
         global_imp = rf_importances.get(feat, 0.0)
-        mean_val   = training_means.get(feat, 0)
-        raw_val    = form_data.get(feat)
+        if global_imp < 1e-6:
+            scores[feat] = 0.0
+            continue
 
-        if feat in categorical_features:
-            # Binary deviation: different from the most common category?
-            deviation = 0.0 if str(raw_val) == str(mean_val) else 1.0
-        else:
-            try:
-                val  = float(raw_val)
-                base = float(mean_val)
-                # Normalise by mean so large-scale features don't dominate
-                deviation = (val - base) / (abs(base) + 1e-9)
-            except (TypeError, ValueError):
-                deviation = 0.0
+        # Build counterfactual: swap just this feature for its neutral value
+        cf_data = dict(form_data)
+        cf_data[feat] = training_means[feat]
 
-        scores[feat] = global_imp * deviation
+        try:
+            cf_proba = model.predict_proba(pd.DataFrame([cf_data]))[0][1]
+            # Positive impact → current value lowers probability → GOOD (reduces risk)
+            # Negative impact → current value raises probability → BAD (increases risk)
+            impact = base_proba - cf_proba
+            scores[feat] = global_imp * impact
+        except Exception:
+            scores[feat] = 0.0
 
-    # Sort by absolute magnitude, return top features
+    # Sort by absolute magnitude (most influential features first)
     ranked = sorted(scores.items(), key=lambda x: abs(x[1]), reverse=True)
     return ranked
 
@@ -205,12 +209,14 @@ def predict():
             }
 
             # Get ranked features (sorted by absolute local importance)
-            ranked = compute_local_importance(form_data)
+            ranked = compute_local_importance(form_data, probability)
             top_features = ranked[:3]
 
             risk_analysis = []
             for raw_feature, score in top_features:
-                is_risk = score > 0        # positive deviation on an important feature → more risk
+                # score > 0 → feature REDUCES risk vs neutral → Positive (good for applicant)
+                # score < 0 → feature INCREASES risk vs neutral → Negative (bad for applicant)
+                is_risk = score < 0
                 impact_type = "Negative" if is_risk else "Positive"
                 human_name = feature_map.get(raw_feature, raw_feature)
                 actual_value = form_data.get(raw_feature, '')
